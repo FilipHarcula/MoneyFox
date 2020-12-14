@@ -1,4 +1,5 @@
-﻿using MoneyFox.Application.Accounts.Queries.GetIncludedAccountBalanceSummary;
+﻿using MoneyFox.Application.Accounts.Queries.GetExcludedAccount;
+using MoneyFox.Application.Accounts.Queries.GetIncludedAccountBalanceSummary;
 using MoneyFox.Application.Common.Interfaces;
 using MoneyFox.Application.Tests.Infrastructure;
 using MoneyFox.Domain.Entities;
@@ -51,6 +52,24 @@ namespace MoneyFox.Application.Tests.Accounts.Queries
 
             // Assert
             result.ShouldEqual(80);
+        }
+
+        [Fact]
+        public async Task GetExcludedAccountQuery_FilterExcludedAccount()
+        {
+            // Arrange
+            var accountExcluded = new Account("test", 14, isExcluded: true);
+            var accountIncluded = new Account("test", 258);
+            await context.AddAsync(accountExcluded);
+            await context.AddAsync(accountIncluded);
+            await context.SaveChangesAsync();
+
+            // Act
+            var result = await new GetExcludedAccountQuery.Handler(contextAdapterMock.Object)
+                .Handle(new GetExcludedAccountQuery(), default);
+
+            // Assert
+            result[0].CurrentBalance.ShouldEqual(14);
         }
     }
 }
